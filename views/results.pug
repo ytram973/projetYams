@@ -1,0 +1,29 @@
+doctype html
+html
+  head
+    title Résultats du Jeu Yams
+  body
+    h1 Résultats du Jeu Yams
+    h2 Pâtisseries gagnées
+    ul
+      each patisserie in pastries
+        li= patisserie.name
+    h2 Historique des Gains
+    table
+      thead
+        tr
+          th Pâtisserie
+          th Date
+      tbody
+        each gain in gains
+          tr
+            td= gain.patisserie
+            td= formatDate(gain.date)
+
+    // Vous pouvez styliser les éléments avec des classes CSS ou des attributs inline si nécessaire
+
+  script.
+    function formatDate(date) {
+      const options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' };
+      return new Date(date).toLocaleDateString('fr-FR', options);
+    }

@@ -1,30 +1,47 @@
-import authors from "./routers/authors.js"
-import dotenv from "dotenv"
-import express from "express"
-import mongoose from "mongoose"
-dotenv.config()
+const express = require('express');
+const mongoose = require('mongoose');
+const Patisserie = require('./models/patisserie');
 
-const { APP_HOST, APP_PORT, MONGO_URI, NODE_ENV } = process.env
+const app = express();
+const port = 3000; // ou tout autre port de votre choix
 
-const app = express()
+// Connexion à la base de données MongoDB
+mongoose.connect('mongodb://127.0.0.1:27017/jeu-yams', { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('Connected to MongoDB');
+  })
+  .catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
+  });
 
-// Déclarer le moteur de rendu à Express
-app.set("view engine", "pug")
+// Configuration du moteur de rendu Pug
+app.set('view engine', 'pug');
+app.set('views', './views');
 
-// Minifier automatiquement les templates PUG en production, mais pas en dev
-app.locals.pretty = NODE_ENV !== "production" ? true : false
+// Routes de l'application
+app.get('/', async (req, res) => {
+  try {
+    const patisseries = await Patisserie.find().sort({ order: 1 });
+    res.render('index', { patisseries });
+  } catch (error) {
+    console.error('Error retrieving pastries:', error);
+    res.sendStatus(500);
+  }
+});
 
-// Déclaration des routeurs et middlewares
-app.use(express.urlencoded({ extended: false })) // Fourni l'objet "req.body" lors de la validation de formulaire
-app.use("/author", authors)
+app.get('/', async (req, res) => {
+  try {
+    const patisseries = await Patisserie.find().sort({ order: 1 });
+    const dice = [1, 2, 3, 4, 5]; // Exemple de liste de valeurs pour les dés
+    res.render('index', { patisseries, dice });
+  } catch (error) {
+    console.error('Error retrieving pastries:', error);
+    res.sendStatus(500);
+  }
+});
 
-try {
-  await mongoose.connect(MONGO_URI)
-  console.log("Connexion MonboDB établie!")
 
-  app.listen(APP_PORT, () =>
-    console.log(`L'application écoute sur http://${APP_HOST}:${APP_PORT}`)
-  )
-} catch (err) {
-  console.log("Impossible de démarrer l'application Node", err.message)
-}
+// Démarrer le serveur
+app.listen(port, () => {
+  console.log(`Server listening at http://localhost:${port}`);
+});

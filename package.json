@@ -26,5 +26,5 @@
     "mongoose": "^7.2.0",
     "pug": "^3.0.2"
   },
-  "type": "module"
+  "type": "commonjs"
 }
