@@ -1,11 +1,12 @@
 const express = require("express")
 const mongoose = require("mongoose")
 const Patisserie = require("./models/patisserie")
+const User = require('./models/user');
 
 const app = express()
-const port = 3000 // ou tout autre port de votre choix
+const port = 3000 
 
-// Connexion à la base de données MongoDB
+
 mongoose
   .connect("mongodb://127.0.0.1:27017/jeu-yams", {
     useNewUrlParser: true,
@@ -63,13 +64,57 @@ app.get("/", async (req, res) => {
     res.sendStatus(500)
   }
 })
+
+
 app.get("/login", (req, res) => {
   res.render("login")
 })
 
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await User.findOne({ username, password });
+    if (user) {
+      // Utilisateur trouvé, connexion réussie
+      res.status(200).json({ message: 'Login successful' });
+    } else {
+      // Utilisateur non trouvé, identifiants invalides
+      res.status(401).json({ message: 'Invalid credentials' });
+    }
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.sendStatus(500);
+  }
+});
+
+
+
+
 app.get("/Register", async (req, res) => {
   res.render("Register")
 })
+app.post('/Register', async (req, res) => {
+  const { username, email, password } = req.body;
+
+  try {
+    // Création d'une nouvelle instance de User avec les données de l'utilisateur
+    const newUser = new User({
+      username: username,
+      email: email,
+      password: password
+    });
+
+    // Enregistrement du nouvel utilisateur dans la base de données
+    await newUser.save();
+
+    res.status(201).json({ message: 'Registration successful', user: newUser });
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(409).json({ message: error.message });
+  }
+});
+
 
 // Démarrer le serveur
 app.listen(port, () => {
