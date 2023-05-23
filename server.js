@@ -67,7 +67,7 @@ app.get("/login", (req, res) => {
   res.render("login")
 })
 
-app.post("/Register", async (req, res) => {
+app.get("/Register", async (req, res) => {
   res.render("Register")
 })
 
