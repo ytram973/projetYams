@@ -14,6 +14,7 @@ html
         text-align: center;
         font-family: Arial, sans-serif;
         color: white;
+        position: relative;
       }
 
       h1 {
@@ -31,6 +32,16 @@ html
       .dice img {
         width: 100px;
         margin: 0 1rem;
+        border: 2px solid transparent;
+        transition: border-color 0.3s;
+      }
+
+      .dice img.win {
+        border-color: green;
+      }
+
+      .dice img.partial-win {
+        border-color: orange;
       }
 
       button {
@@ -45,11 +56,74 @@ html
 
       p {
         font-size: 1.2rem;
-         color: black;
+        color: black;
       }
 
-      a{
+      a {
         color: black;
+      }
+
+      .rules-container {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: orange;
+        padding: 10px;
+        border-radius: 10px;
+        animation: slide-in 1s ease-in-out;
+        z-index: 999;
+        display: none;
+      }
+
+      .rules-container h2 {
+        color: white;
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .rules-container ul {
+        color: white;
+        text-align: left;
+        margin-left: 1rem;
+      }
+
+      .rules-container li {
+        margin-bottom: 0.5rem;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+      }
+
+      .win-animation {
+        animation-name: shake;
+        animation-duration: 0.5s;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+      }
+
+      .win-animation.active {
+        animation-play-state: running;
+      }
+
+      @keyframes shake {
+        0% { transform: translate(0, 0); }
+        10% { transform: translate(-2px, -2px); }
+        20% { transform: translate(2px, -2px); }
+        30% { transform: translate(-2px, 2px); }
+        40% { transform: translate(2px, 2px); }
+        50% { transform: translate(-2px, -2px); }
+        60% { transform: translate(2px, -2px); }
+        70% { transform: translate(-2px, 2px); }
+        80% { transform: translate(2px, 2px); }
+        90% { transform: translate(-2px, -2px); }
+          100% { transform: translate(0, 0); }
       }
 
   body
@@ -60,10 +134,30 @@ html
           img(src=`/dice${i}.png`)
       button(type="button" id="btnLancer") Lancer les dés
       p Pâtisserie gagnée : #{pastry}
+      button(type="button" id="btnInfos") Infos
+      div.rules-container
+        h2 Règles pour gagner une pâtisserie
+        p Pour gagner une pâtisserie, vous devez obtenir certaines combinaisons spécifiques avec les dés. Voici les combinaisons possibles et les pâtisseries correspondantes :
+        ul
+          li Si vous obtenez cinq dés ayant la même valeur, vous gagnez une Brioche sucrée avec chocolat.
+          li Si vous obtenez quatre dés ayant la même valeur, vous gagnez un Cake glacé fondant au chocolat.
+          li Si vous obtenez trois dés ayant la même valeur et les deux autres dés ayant une autre même valeur, vous gagnez une Tarte aux fruits.
+          li Si vous obtenez cinq dés consécutifs (par exemple, 1, 2, 3, 4, 5 ou 2, 3, 4, 5, 6), vous gagnez un Éclair au café.
+          li Si vous obtenez trois dés ayant la même valeur, vous gagnez un Croissant aux amandes.
+          li Si aucune de ces combinaisons n'est réalisée, vous ne gagnez aucune pâtisserie.
+          span.close-btn(x-data="{ open: false }" @click="open = false") X
+      audio(id="diceSound" src="/dice-sound.mp3" preload="auto") // Son de lancé de dé
+      audio(id="confettiSound" src="/confetti-sound.mp3" preload="auto") // Son des confettis
+      script(src="https://cdn.jsdelivr.net/npm/alpinejs") // Importer la bibliothèque Alpine.js
       script.
         let btnLancer = document.getElementById("btnLancer");
         let dice = document.querySelectorAll('.dice img');
         let pastry = '';
+        let rulesContainer = document.querySelector('.rules-container');
+        let btnInfos = document.getElementById("btnInfos");
+        let closeBtn = document.querySelector('.close-btn');
+        let diceSound = document.getElementById("diceSound");
+        let confettiSound = document.getElementById("confettiSound");
 
         btnLancer.addEventListener('click', () => {
           let results = [];
@@ -74,21 +168,48 @@ html
             dice[i].src = `/dice${result}.png`;
           }
 
+          diceSound.currentTime = 0; // Rembobiner le son à chaque lancé
+          diceSound.play();
+
           if (isYams(results)) {
             pastry = 'Brioche sucrée avec chocolat';
+            // Ajouter la classe d'animation pour l'encadrement en vert
+            dice.forEach((die) => die.classList.add('win'));
+            // Activer l'animation de confettis pendant 12 secondes
+            confettiAnimation();
           } else if (isCarré(results)) {
             pastry = 'Cake glacé fondant au chocolat';
+            // Ajouter la classe d'animation pour l'encadrement en vert
+            dice.forEach((die) => die.classList.add('win'));
           } else if (isFull(results)) {
             pastry = 'Tarte aux fruits';
+            // Ajouter la classe d'animation pour l'encadrement en orange
+            dice.forEach((die) => die.classList.add('partial-win'));
           } else if (isSuite(results)) {
             pastry = 'Éclair au café';
+            // Ajouter la classe d'animation pour l'encadrement en orange
+            dice.forEach((die) => die.classList.add('partial-win'));
           } else if (isTriple(results)) {
             pastry = 'Croissant aux amandes';
+            // Ajouter la classe d'animation pour l'encadrement en orange
+            dice.forEach((die) => die.classList.add('partial-win'));
           } else {
             pastry = 'Aucune pâtisserie gagnée';
+            // Activer l'animation de tremblement
+            shakeAnimation();
           }
 
           document.querySelector('p').textContent = `Pâtisserie gagnée : ${pastry}`;
+        });
+
+        btnInfos.addEventListener('click', () => {
+          rulesContainer.style.display = 'block';
+        });
+
+        document.addEventListener('click', (event) => {
+          if (!rulesContainer.contains(event.target) && event.target !== btnInfos) {
+            rulesContainer.style.display = 'none';
+          }
         });
 
         function isYams(results) {
@@ -131,4 +252,26 @@ html
             counters[result] = (counters[result] || 0) + 1;
             return counters;
           }, {});
+        }
+
+        function shakeAnimation() {
+          document.querySelector('.game-container').classList.add('win-animation', 'active');
+          setTimeout(() => {
+            document.querySelector('.game-container').classList.remove('win-animation', 'active');
+          }, 1000);
+        }
+
+        function confettiAnimation() {
+          confettiSound.currentTime = 0;
+          confettiSound.play();
+          dice.forEach((die, index) => {
+            setTimeout(() => {
+              die.src = `/dice${index + 1}.png`;
+            }, (index + 1) * 2000);
+          });
+          setTimeout(() => {
+            dice.forEach((die) => {
+              die.src = `/dice${Math.floor(Math.random() * 6) + 1}.png`;
+            });
+          }, 12000);
         }
