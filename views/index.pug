@@ -4,7 +4,7 @@ html
     title Jeu de Yams
     style.
       .game-container {
-        background-image: url("path/to/background-image.jpg");
+        background: url('/assets/background.jpg');
         background-size: cover;
         display: flex;
         flex-direction: column;
@@ -57,7 +57,7 @@ html
       h1 Jeu de Yams
       .dice
         - for (let i = 1; i <= 5; i++)
-          img(src=`\marty\Desktop\projetYams\assets\dice${i}.png`, alt=`Dé ${i}`)
+          img(src=`/dice${i}.png`)
       button(type="button" id="btnLancer") Lancer les dés
       p Pâtisserie gagnée : #{pastry}
       script.
@@ -71,7 +71,7 @@ html
           for (let i = 0; i < dice.length; i++) {
             let result = Math.floor(Math.random() * 6) + 1;
             results.push(result);
-            dice[i].src = `C:\Users\marty\Desktop\projetYams\assets\dice${result}_960_720.png`;
+            dice[i].src = `/dice${result}.png`;
           }
 
           if (isYams(results)) {

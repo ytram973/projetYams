@@ -1,7 +1,6 @@
 const express = require("express")
 const mongoose = require("mongoose")
 const Patisserie = require("./models/patisserie")
-const session = require("express-session")
 
 const app = express()
 const port = 3000 // ou tout autre port de votre choix
@@ -23,23 +22,23 @@ mongoose
 app.set("view engine", "pug")
 app.set("views", "./views")
 
+// // Middleware pour la gestion de session
+// app.use(
+//   session({
+//     secret: "secret-key",
+//     resave: false,
+//     saveUninitialized: true,
+//   })
+// )
 
-// Middleware pour la gestion de session
-app.use(session({
-  secret: "secret-key",
-  resave: false,
-  saveUninitialized: true,
-}))
-
-// Middleware pour la gestion des données de formulaire
-const requireAuth = (req, res, next) => {
-  if (req.session.LoggedIn) {
-    next()
-  } else {
-    res.redirect("/login")
-  }
-}
-
+// // Middleware pour la gestion des données de formulaire
+// const requireAuth = (req, res, next) => {
+//   if (req.session.LoggedIn) {
+//     next()
+//   } else {
+//     res.redirect("/login")
+//   }
+// }
 
 // Routes de l'application
 app.get("/", async (req, res) => {
@@ -52,6 +51,7 @@ app.get("/", async (req, res) => {
   }
 })
 
+app.use(express.static("assets"))
 
 app.get("/", async (req, res) => {
   try {
