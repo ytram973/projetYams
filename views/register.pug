@@ -46,9 +46,9 @@ html
     body
         div.container
             h1 Inscription au Jeu de Yams
-            form(action="/inscription" method="POST")
+            form(action="/" method="POST")
                 input(type="text" name="username" placeholder="Nom d'utilisateur")
                 input(type="password" name="password" placeholder="Mot de passe")
                 input(type="password" name="confirmPassword" placeholder="Confirmer le mot de passe")
                 button(type="submit") S'inscrire
-            p Déjà inscrit ? <a href="/connexion">Connectez-vous ici</a>
+            p Déjà inscrit ? <a href="/login">Connectez-vous ici</a>
