@@ -1,11 +1,11 @@
-const express = require("express")
-const mongoose = require("mongoose")
-const Patisserie = require("./models/patisserie")
+const express = require("express");
+const mongoose = require("mongoose");
+const Patisserie = require("./models/patisserie");
 const User = require('./models/user');
+const session = require('express-session');
 
-const app = express()
-const port = 3000 
-
+const app = express();
+const port = 3000;
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/jeu-yams", {
@@ -13,62 +13,40 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("Connected to MongoDB")
+    console.log("Connected to MongoDB");
   })
   .catch((error) => {
-    console.error("Error connecting to MongoDB:", error)
-  })
+    console.error("Error connecting to MongoDB:", error);
+  });
 
-// Configuration du moteur de rendu Pug
-app.set("view engine", "pug")
-app.set("views", "./views")
+app.set("view engine", "pug");
+app.set("views", "./views");
 
-// // Middleware pour la gestion de session
-// app.use(
-//   session({
-//     secret: "secret-key",
-//     resave: false,
-//     saveUninitialized: true,
-//   })
-// )
+app.use(session({
+  secret: 'your secret key',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } // true if you want to use it over HTTPS
+}));
 
-// // Middleware pour la gestion des données de formulaire
-// const requireAuth = (req, res, next) => {
-//   if (req.session.LoggedIn) {
-//     next()
-//   } else {
-//     res.redirect("/login")
-//   }
-// }
+app.use(express.static("assets"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Routes de l'application
-app.get("/", async (req, res) => {
+app.get("/", isLoggedIn, async (req, res) => {
   try {
-    const patisseries = await Patisserie.find().sort({ order: 1 })
-    res.render("index", { patisseries })
+    const patisseries = await Patisserie.find().sort({ order: 1 });
+    const dice = [1, 2, 3, 4, 5];
+    res.render("index", { patisseries, dice });
   } catch (error) {
-    console.error("Error retrieving pastries:", error)
-    res.sendStatus(500)
+    console.error("Error retrieving pastries:", error);
+    res.sendStatus(500);
   }
-})
-
-app.use(express.static("assets"))
-
-app.get("/", async (req, res) => {
-  try {
-    const patisseries = await Patisserie.find().sort({ order: 1 })
-    const dice = [1, 2, 3, 4, 5] // Exemple de liste de valeurs pour les dés
-    res.render("index", { patisseries, dice })
-  } catch (error) {
-    console.error("Error retrieving pastries:", error)
-    res.sendStatus(500)
-  }
-})
-
+});
 
 app.get("/login", (req, res) => {
-  res.render("login")
-})
+  res.render("login");
+});
 
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
@@ -76,10 +54,9 @@ app.post('/login', async (req, res) => {
   try {
     const user = await User.findOne({ username, password });
     if (user) {
-      // Utilisateur trouvé, connexion réussie
+      req.session.user = user; // Setting the user in the session
       res.status(200).json({ message: 'Login successful' });
     } else {
-      // Utilisateur non trouvé, identifiants invalides
       res.status(401).json({ message: 'Invalid credentials' });
     }
   } catch (error) {
@@ -88,35 +65,52 @@ app.post('/login', async (req, res) => {
   }
 });
 
+app.get("/register", async (req, res) => {
+  res.render("register");
+});
 
-
-
-app.get("/Register", async (req, res) => {
-  res.render("Register")
-})
-app.post('/Register', async (req, res) => {
+app.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
   try {
-    // Création d'une nouvelle instance de User avec les données de l'utilisateur
-    const newUser = new User({
-      username: username,
-      email: email,
-      password: password
-    });
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      res.status(409).json({ message: 'Username already exists.' });
+    } else {
+      const newUser = new User({
+        username: username,
+        email: email,
+        password: password
+      });
 
-    // Enregistrement du nouvel utilisateur dans la base de données
-    await newUser.save();
+      await newUser.save();
 
-    res.status(201).json({ message: 'Registration successful', user: newUser });
+      res.redirect('/login'); // Redirecting to login page after successful registration
+    }
   } catch (error) {
     console.error('Error registering user:', error);
     res.status(409).json({ message: error.message });
   }
 });
 
+app.get("/logout", function (req, res) {
+  req.session.destroy(function(err) {
+    if (err) { return next(err); }
+    res.redirect('/');
+  });
+});
 
-// Démarrer le serveur
+function isLoggedIn(req, res, next) {
+  if (req.session.user) {
+    return next();
+  }
+  res.redirect("/login");
+}
+
+app.get("/play", isLoggedIn, (req, res) => {
+  res.render("play");
+});
+
 app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`)
-})
+  console.log(`Server listening at http://localhost:${port}`);
+});
