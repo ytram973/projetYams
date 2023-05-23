@@ -78,23 +78,57 @@ html
             pastry = 'Brioche sucrée avec chocolat';
           } else if (isCarré(results)) {
             pastry = 'Cake glacé fondant au chocolat';
-          } else if (isDouble(results)) {
-            pastry = 'Cake tout Chocolat';
+          } else if (isFull(results)) {
+            pastry = 'Tarte aux fruits';
+          } else if (isSuite(results)) {
+            pastry = 'Éclair au café';
+          } else if (isTriple(results)) {
+            pastry = 'Croissant aux amandes';
           } else {
-            pastry = '';
+            pastry = 'Aucune pâtisserie gagnée';
           }
 
           document.querySelector('p').textContent = `Pâtisserie gagnée : ${pastry}`;
         });
 
         function isYams(results) {
-          return false;
+          const uniqueResults = [...new Set(results)];
+          return uniqueResults.length === 1;
         }
 
         function isCarré(results) {
+          const counters = countOccurrences(results);
+          for (const result in counters) {
+            if (counters[result] >= 4) {
+              return true;
+            }
+          }
           return false;
         }
 
-        function isDouble(results) {
-          return false;
+        function isFull(results) {
+          const counters = countOccurrences(results);
+          return Object.values(counters).includes(2) && Object.values(counters).includes(3);
+        }
+
+        function isSuite(results) {
+          const sortedResults = results.slice().sort((a, b) => a - b);
+          for (let i = 0; i < sortedResults.length - 1; i++) {
+            if (sortedResults[i] !== sortedResults[i + 1] - 1) {
+              return false;
+            }
+          }
+          return true;
+        }
+
+        function isTriple(results) {
+          const counters = countOccurrences(results);
+          return Object.values(counters).includes(3);
+        }
+
+        function countOccurrences(arr) {
+          return arr.reduce((counters, result) => {
+            counters[result] = (counters[result] || 0) + 1;
+            return counters;
+          }, {});
         }
