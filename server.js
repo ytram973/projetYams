@@ -1,7 +1,7 @@
 const express = require("express")
 const mongoose = require("mongoose")
 const Patisserie = require("./models/patisserie")
-const session = require("express-session")S
+const session = require("express-session")
 
 const app = express()
 const port = 3000 // ou tout autre port de votre choix
