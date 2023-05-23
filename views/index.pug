@@ -1,7 +1,7 @@
 doctype html
 html
   head
-    title Jeu de Dés
+    title Jeu de Yams
     style.
       .game-container {
         background-image: url("path/to/background-image.jpg");
@@ -45,11 +45,50 @@ html
       p {
         font-size: 1.2rem;
       }
+
   body
     div.game-container
-      h1 Jeu de Dés
+      h1 Jeu de Yams
       .dice
-        // each die in dice
-          img(src=`path/to/dice-${die}.png`, alt=`Dé ${die}`)
-      button(type="button") Lancer les dés
+        - for (let i = 1; i <= 5; i++)
+          img(src=`https://cdn.pixabay.com/photo/2013/07/12/17/39/dice-15217${i}_960_720.png`, alt=`Dé ${i}`)
+      button(type="button" id="btnLancer") Lancer les dés
       p Pâtisserie gagnée : #{pastry}
+      script.
+        let btnLancer = document.getElementById("btnLancer");
+        let dice = document.querySelectorAll('.dice img');
+        let pastry = '';
+
+        btnLancer.addEventListener('click', () => {
+          let results = [];
+
+          for (let i = 0; i < dice.length; i++) {
+            let result = Math.floor(Math.random() * 6) + 1;
+            results.push(result);
+            dice[i].src = `https://cdn.pixabay.com/photo/2013/07/12/17/39/dice-15217${result}_960_720.png`;
+          }
+
+          if (isYams(results)) {
+            pastry = 'Brioche sucrée avec chocolat';
+          } else if (isCarré(results)) {
+            pastry = 'Cake glacé fondant au chocolat';
+          } else if (isDouble(results)) {
+            pastry = 'Cake tout Chocolat';
+          } else {
+            pastry = '';
+          }
+
+          document.querySelector('p').textContent = `Pâtisserie gagnée : ${pastry}`;
+        });
+
+        function isYams(results) {
+          return false;
+        }
+
+        function isCarré(results) {
+          return false;
+        }
+
+        function isDouble(results) {
+          return false;
+        }
