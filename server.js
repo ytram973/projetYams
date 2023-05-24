@@ -55,7 +55,8 @@ app.post('/login', async (req, res) => {
     const user = await User.findOne({ username, password });
     if (user) {
       req.session.user = user; // Setting the user in the session
-      res.status(200).json({ message: 'Login successful' });
+      // res.status(200).json({ message: 'Login successful' });
+      res.redirect("/")
     } else {
       res.status(401).json({ message: 'Invalid credentials' });
     }
