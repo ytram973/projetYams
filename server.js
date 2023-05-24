@@ -1,3 +1,4 @@
+require('dotenv').config(); 
 const express = require("express");
 const mongoose = require("mongoose");
 const Patisserie = require("./models/patisserie");
@@ -5,10 +6,10 @@ const User = require('./models/user');
 const session = require('express-session');
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT ;
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/jeu-yams", {
+  .connect(process.env.MONGODB_URI, { 
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -23,13 +24,14 @@ app.set("view engine", "pug");
 app.set("views", "./views");
 
 app.use(session({
-  secret: 'your secret key',
+  secret: process.env.SESSION_SECRET, // 
   resave: false,
   saveUninitialized: true,
   cookie: { secure: false } // true if you want to use it over HTTPS
 }));
 
 app.use(express.static("assets"));
+app.use(express.static("./public"))
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
