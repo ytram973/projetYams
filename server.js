@@ -39,7 +39,8 @@ app.get("/", isLoggedIn, async (req, res) => {
   try {
     const patisseries = await Patisserie.find().sort({ order: 1 });
     const dice = [1, 2, 3, 4, 5];
-    res.render("index", { patisseries, dice });
+    const user = req.session.user; // Récupérer l'utilisateur connecté depuis la session
+    res.render("index", { patisseries, dice, user }); // Passer la variable user
   } catch (error) {
     console.error("Error retrieving pastries:", error);
     res.sendStatus(500);
