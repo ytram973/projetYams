@@ -4,14 +4,14 @@ html
     title Jeu de Yams
     link(rel="stylesheet" href="/style.css")
   body
-    div.game-container
-      h1 Jeu de Yams
-      nav
+    nav
         ul
-            li
+          li
               h3 
                 a(href="/logout") logout
-
+    div.game-container
+      h1 Jeu de Yams
+      h3.user-name Bonjours #{user.username}
       .dice
         - for (let i = 1; i <= 5; i++)
           img(src=`/dice${i}.png`)
