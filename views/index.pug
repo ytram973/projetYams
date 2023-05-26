@@ -16,7 +16,8 @@ html
         - for (let i = 1; i <= 5; i++)
           img(src=`/dice${i}.png`)
       button(type="button" id="btnLancer") Lancer les dés
-      p Pâtisserie gagnée : #{pastry}
+      p.patisserieWin Pâtisserie gagnée : #{pastry}
+      p.nombreWin Nombre de Pâtisseries gagnées : #{pastryCount}
       button(type="button" id="btnInfos") Infos
       div.rules-container
         h2 Règles pour gagner une pâtisserie
